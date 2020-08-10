@@ -1,0 +1,16 @@
+# Finder  & Explorers files
+.DS_Store
+._*
+Thumbs.db
+
+# Build outputs
+build
+out
+
+# IDE & build system config
+.idea
+.project
+.classpath
+.vscode
+gradle.properties
+.gradle
