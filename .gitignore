@@ -6,6 +6,7 @@ Thumbs.db
 # Build outputs
 build
 out
+incoming
 
 # IDE & build system config
 .idea

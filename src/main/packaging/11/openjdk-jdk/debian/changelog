@@ -1,0 +1,5 @@
+adoptium-11-hotspot (@pkgversion@) UNRELEASED; urgency=medium
+
+  * Adoptium @buildversion@ build.
+
+ -- Eclipse Adoptium Package Maintainers <packaging@adoptium.com>  @pkgdate@
