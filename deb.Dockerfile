@@ -3,10 +3,12 @@ FROM debian:buster
 # Combine apt-get update with apt-get install to prevent stale package indexes.
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential \
  		debhelper sudo lsb-release reprepro gosu java-common libasound2 libc6 libx11-6 \
- 		libfontconfig1 libfreetype6 libxext6 libxi6 libxrender1 libxtst6 zlib1g
+ 		libfontconfig1 libfreetype6 libxext6 libxi6 libxrender1 libxtst6 zlib1g tini
 
-# Create unprivileged user for building
-RUN useradd -m -d /home/builder builder
+# Create unprivileged user for building, see
+# https://github.com/hexops/dockerfile#use-a-static-uid-and-gid
+RUN groupadd -g 10001 builder
+RUN useradd -m -d /home/builder -u 10000 -g 10001 builder
 
 # Prepare entrypoint and build scripts
 ADD entrypoint.sh /entrypoint.sh
@@ -20,4 +22,4 @@ changestool /home/builder/out/*.changes setdistribution $VERSIONS\n\
 >> /home/builder/build.sh
 RUN chmod +x /home/builder/build.sh
 
-ENTRYPOINT /bin/bash /entrypoint.sh
+ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "/entrypoint.sh" ]
