@@ -6,8 +6,6 @@ import java.time.format.DateTimeFormatter
 
 plugins {
 	id "java"
-	id "checkstyle"
-	id "io.spring.nohttp" version "0.0.5.RELEASE"
 }
 
 ext {
@@ -66,10 +64,6 @@ test {
 	testLogging {
 		events "passed", "skipped", "failed"
 	}
-}
-
-checkstyle {
-	toolVersion = "8.35"
 }
 
 task deb {
