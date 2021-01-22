@@ -1,11 +1,11 @@
-Source: adoptium-11-hotspot
+Source: temurin-jdk-11
 Section: java
 Priority: optional
 Maintainer: Eclipse Adoptium Package Maintainers <packaging@adoptium.com>
 Build-Depends: debhelper (>= 11), lsb-release
 
-Package: adoptium-11-hotspot
-Architecture: amd64 armhf arm64 ppc64el riscv64 s390x
+Package: temurin-jdk-11
+Architecture: amd64 armhf arm64 ppc64el s390x
 Depends: adoptium-ca-certificates,
          java-common,
          libasound2,
@@ -56,7 +56,6 @@ Provides: java-compiler,
           java7-runtime-headless,
           java8-runtime-headless,
           java9-runtime-headless
-Description: Adoptium JDK 11 with HotSpot VM
- Provides a Java keystore with CA certificates for OpenJDK, Eclipse Adoptium
- and compatible runtimes. The keystore is automatically synchronized with the
- operating system's certificate store.
+Description: Eclipse Temurin 11 JDK
+ Eclipse Temurin JDK is an OpenJDK-based development environment to create
+ applications and components using the programming language Java.

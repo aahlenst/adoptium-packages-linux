@@ -21,7 +21,7 @@ repositories {
 group "org.adoptium"
 version "1.0.0-SNAPSHOT"
 
-def buildType = "openjdk-jdk"
+def buildType = "temurin-jdk"
 def majorVersion = 11
 
 /*
@@ -33,7 +33,7 @@ def majorVersion = 11
  *
  * **Attention**: If you alter the list, check if the class DebianFlavours needs to be updated, too.
  */
-def deb_versions = ["stretch", "buster", "bullseye", "xenial", "bionic", "focal", "groovy"]
+def deb_versions = ["stretch", "buster", "bullseye", "bionic", "focal", "groovy", "hirsute"]
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_1_8
@@ -78,11 +78,7 @@ task deb {
 	doLast {
 		def datePattern = DateTimeFormatter.ofPattern("E, dd MMM yyyy HH:mm:ss xx").withLocale(Locale.US)
 		project.copy {
-			from("$projectDir/incoming/OpenJDK11U-jdk_x64_linux_hotspot_11.0.8_10.tar.gz")
-			into("${buildDir}/generated/packaging")
-		}
-		project.copy {
-			from("src/main/packaging/$majorVersion/$buildType") {
+			from("src/main/packaging/$buildType/$majorVersion/") {
 				filter(ReplaceTokens, tokens: [
 					"buildversion": "15+35-202008102051",
 					"pkgdate"     : OffsetDateTime.now(ZoneOffset.UTC).format(datePattern),

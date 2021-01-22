@@ -1,0 +1,35 @@
+#!/usr/bin/make -f
+
+d = debian/temurin-jdk-11
+jhome = usr/lib/jvm
+jdirname = temurin-jdk-11-$(DEB_HOST_ARCH)
+amd64_tarball_url = https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.10_9.tar.gz
+amd64_checksum = ae78aa45f84642545c01e8ef786dfd700d2226f8b12881c844d6a1f71789cb99
+
+%:
+	dh $@
+
+override_dh_auto_clean:
+override_dh_auto_test:
+override_dh_auto_build:
+override_dh_auto_install:
+	# Download and verify checksum of JDK
+	wget --progress=dot:mega -O jdk.tar.gz $($(DEB_HOST_ARCH)_tarball_url)
+	echo '$($(DEB_HOST_ARCH)_checksum) jdk.tar.gz' > jdk.tar.gz.sha256.txt
+	sha256sum -c jdk.tar.gz.sha256.txt
+
+	# Unpack JDK
+	dh_installdirs \
+		$(jhome) \
+		$(jhome)/$(jdirname)
+	tar --strip-components=1 -C "$(d)/$(jhome)/$(jdirname)" -xf jdk.tar.gz
+	
+	# Strip bundled Freetype and use OS package instead 
+	rm -f "$(d)/$(jhome)/$(jdirname)/lib/libfreetype.so"
+
+	# Replace bundled cacerts and redirect to adoptium-ca-certificates
+	rm -f "$(d)/$(jhome)/$(jdirname)/lib/security/cacerts"
+	ln -s /etc/ssl/certs/adoptium/cacerts "$(d)/$(jhome)/$(jdirname)/lib/security/cacerts"
+
+override_dh_gencontrol:
+	dh_gencontrol --
