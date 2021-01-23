@@ -14,10 +14,19 @@ RUN useradd -m -d /home/builder -u 10000 -g 10001 builder
 ADD entrypoint.sh /entrypoint.sh
 RUN printf '#!/usr/bin/env bash\n\
 set -euxo pipefail\n\
-cd /home/builder/workspace/generated/packaging\n\
+\n\
+# Copy build scripts into a directory within the container. Avoids polluting the mounted\n\
+# directory and permission errors.\n\
+mkdir /home/builder/workspace\n\
+cp -R /home/builder/build/generated/packaging /home/builder/workspace\n\
+\n\
+# Build package and set distributions it supports.\n\
+cd /home/builder/workspace/packaging\n\
 dpkg-buildpackage -us -uc -b\n\
-mv /home/builder/workspace/generated/*.{deb,changes,buildinfo} /home/builder/out\n\
-changestool /home/builder/out/*.changes setdistribution $VERSIONS\n\
+changestool /home/builder/workspace/*.changes setdistribution $VERSIONS\n\
+\n\
+# Copy resulting files into mounted directory where artifacts should be placed.\n\
+mv /home/builder/workspace/*.{deb,changes,buildinfo} /home/builder/out\n\
 '\
 >> /home/builder/build.sh
 RUN chmod +x /home/builder/build.sh

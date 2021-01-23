@@ -26,4 +26,5 @@ jobs:
 
       - name: Build
         run: |
+          export _JAVA_OPTIONS="-Xmx4G"
           ./gradlew check --stacktrace
