@@ -18,7 +18,8 @@ Depends: adoptium-ca-certificates,
          libxrender1,
          libxtst6,
          zlib1g
-Recommends: fonts-dejavu-core
+Recommends: fonts-dejavu-core,
+            fonts-dejavu-extra
 Provides: java-compiler,
           java-sdk,
           java-sdk-headless,
