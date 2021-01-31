@@ -1,0 +1,102 @@
+plugins {
+	id "java"
+}
+
+ext {
+	junitVersion = "5.7.0"
+	testcontainersVersion = "1.15.1"
+	assertjCoreVersion = "3.18.1"
+}
+
+repositories {
+	mavenCentral()
+}
+
+group "org.adoptium"
+version "1.0.0-SNAPSHOT"
+
+def buildType = "temurin"
+def majorVersion = 11
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+sourceSets {
+	packageTest {
+		compileClasspath += sourceSets.main.output
+		runtimeClasspath += sourceSets.main.output
+	}
+}
+
+configurations {
+	packageTestImplementation.extendsFrom implementation
+	packageTestRuntimeOnly.extendsFrom runtimeOnly
+}
+
+dependencies {
+	packageTestImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
+	packageTestImplementation "org.testcontainers:testcontainers:$testcontainersVersion"
+	packageTestImplementation "org.testcontainers:junit-jupiter:$testcontainersVersion"
+	packageTestImplementation "org.assertj:assertj-core:$assertjCoreVersion"
+}
+
+test {
+	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
+}
+
+task packageJdkRedHat {
+	dependsOn "assemble"
+
+	group = "packaging"
+	description = "Creates RPM package for Red Hat flavours."
+
+	def outputDir = new File(project.buildDir.absolutePath, "rpm")
+	outputs.dir(outputDir)
+
+	doLast {
+		project.copy {
+			from("src/main/packaging/$buildType/$majorVersion/")
+			into("${buildDir}/generated/packaging")
+		}
+		project.exec {
+			workingDir "src/main/packaging"
+			commandLine "docker", "build",
+				"-t", "adoptium-packages-linux-jdk-redhat",
+				"-f", "Dockerfile",
+				getProjectDir().absolutePath + "/src/main/packaging"
+		}
+
+		project.exec {
+			workingDir getRootDir()
+			commandLine "docker", "run", "--rm",
+				"--mount", "type=bind,source=${buildDir},target=/home/builder/build",
+				"--mount", "type=bind,source=${outputDir.absolutePath},target=/home/builder/out",
+				"adoptium-packages-linux-jdk-redhat:latest"
+		}
+	}
+}
+
+task checkJdkRedHat(type: Test) {
+	dependsOn packageJdkRedHat
+
+	description = 'Tests the generated RPM packages for RedHat.'
+	group = 'verification'
+
+	testClassesDirs = sourceSets.packageTest.output.classesDirs
+	classpath = sourceSets.packageTest.runtimeClasspath
+
+	environment "PACKAGE", "temurin-jdk-11"
+
+	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
+}
+
+parent.packageJdk.dependsOn(packageJdkRedHat)
+parent.checkJdkPackage.dependsOn(checkJdkRedHat)
