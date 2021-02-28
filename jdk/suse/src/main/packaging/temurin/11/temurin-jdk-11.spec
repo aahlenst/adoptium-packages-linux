@@ -4,6 +4,8 @@
 
 %define x86_64_tarball_url https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.10_9.tar.gz
 %define x86_64_checksum ae78aa45f84642545c01e8ef786dfd700d2226f8b12881c844d6a1f71789cb99
+%define aarch64_tarball_url https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_aarch64_linux_hotspot_11.0.10_9.tar.gz
+%define aarch64_checksum 420c5d1e5dc66b2ed7dedd30a7bdf94bfaed10d5e1b07dc579722bf60a8114a9
 
 Name:        temurin-jdk-11
 Version:     %{version}
