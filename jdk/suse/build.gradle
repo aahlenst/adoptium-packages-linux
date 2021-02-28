@@ -55,7 +55,7 @@ task packageJdkSuse {
 	group = "packaging"
 	description = "Creates RPM package for SUSE flavours."
 
-	def outputDir = new File(project.buildDir.absolutePath, "rpm")
+	def outputDir = new File(project.buildDir.absolutePath, "ospackage")
 	outputs.dir(outputDir)
 
 	doLast {

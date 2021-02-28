@@ -38,7 +38,7 @@ final class RpmFiles {
 	}
 
 	private static Path findBuildOutputOnHost(String pattern) {
-		Path outputDirectory = Paths.get("build", "rpm");
+		Path outputDirectory = Paths.get("build", "ospackage");
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(outputDirectory, pattern)) {
 			for (Path candidateFile : stream) {
 				return candidateFile;

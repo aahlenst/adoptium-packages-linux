@@ -55,7 +55,7 @@ task packageJdkRedHat {
 	group = "packaging"
 	description = "Creates RPM package for Red Hat flavours."
 
-	def outputDir = new File(project.buildDir.absolutePath, "rpm")
+	def outputDir = new File(project.buildDir.absolutePath, "ospackage")
 	outputs.dir(outputDir)
 
 	doLast {

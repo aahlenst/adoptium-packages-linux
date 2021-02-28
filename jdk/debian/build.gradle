@@ -72,7 +72,7 @@ task packageJdkDebian {
 	group = "packaging"
 	description = "Creates deb package for Debian flavours."
 
-	def outputDir = new File(project.buildDir.absolutePath, "deb")
+	def outputDir = new File(project.buildDir.absolutePath, "ospackage")
 	outputs.dir(outputDir)
 
 	doLast {
