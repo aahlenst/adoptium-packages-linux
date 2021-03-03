@@ -1,15 +1,60 @@
-%define version 11.0.10.0.0+9
-%define release 1.adopt0
-%define priority 1111
+# Allow for a conditional build with/without openj9
+# Defaults to without, i.e. HotSpot
+# Change to 'bcond_without' in order to change the
+# default.
+%bcond_with openj9
 
-%define x86_64_tarball_url https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.10_9.tar.gz
-%define x86_64_checksum ae78aa45f84642545c01e8ef786dfd700d2226f8b12881c844d6a1f71789cb99
-%define aarch64_tarball_url https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_aarch64_linux_hotspot_11.0.10_9.tar.gz
-%define aarch64_checksum 420c5d1e5dc66b2ed7dedd30a7bdf94bfaed10d5e1b07dc579722bf60a8114a9
+# Avoid build failures on some distros due to missing build-id's in binaries
+%global debug_package %{nil}
+%global __brp_strip %{nil}
+
+%global upstream_version 11.0.10+9
+# Only [A-Za-z0-9.] allowed in version:
+# https://docs.fedoraproject.org/en-US/packaging-guidelines/Versioning/#_upstream_uses_invalid_characters_in_the_version
+# also not very intuitive:
+#  $ rpmdev-vercmp 11.0.10.0.1___9 11.0.10.0.0+9
+#  11.0.10.0.0___9 == 11.0.10.0.0+9
+%global spec_version 11.0.10.0.0.9
+%global upstream_version_url %(echo %{upstream_version} | sed 's/\+/%%2B/g')
+%global upstream_version_no_plus %(echo %{upstream_version} | sed 's/\+/_/g')
+
+%global spec_release 1.adopt0
+%global priority 1111
+
+# Map architecture to the expected value in the download URL; Allow for a
+# pre-defined value of vers_arch and use that if it's defined
+#  x86_64 => x64
+#  i668 = x86
+%if %{!?vers_arch:1}0
+%ifarch x86_64
+%global vers_arch x64
+%else
+%ifarch %{ix86}
+%global vers_arch x86
+%else
+# Catch-all, use _arch value
+%global vers_arch %{_arch}
+%endif
+%endif
+%endif
+
+%if %{with openj9}
+%global openj9_version 0.24.0
+%global openj9_url_version _openj9-%{openj9_version}
+%global jvm_type openj9
+%global java_provides openj9
+%else
+%global openj9_version %{nil}
+%global openj9_url_version %{nil}
+%global jvm_type hotspot
+%global java_provides openjdk
+%endif
+
+%global source_url_base https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download
 
 Name:        temurin-jdk-11
-Version:     %{version}
-Release:     %{release}
+Version:     %{spec_version}
+Release:     %{spec_release}
 Summary:     Eclipse Temurin 11 JDK
 
 Group:       java
@@ -42,20 +87,22 @@ Requires: freetype%{?_isa}
 Provides: java
 Provides: java-11
 Provides: java-11-devel
-Provides: java-11-openjdk
-Provides: java-11-openjdk-devel
+Provides: java-11-%{java_provides}
+Provides: java-11-%{java_provides}-devel
 Provides: java-devel
-Provides: java-openjdk
-Provides: java-openjdk-devel
+Provides: java-%{java_provides}
+Provides: java-%{java_provides}-devel
 Provides: java-sdk-11
-Provides: java-sdk-11-openjdk
+Provides: java-sdk-11-%{java_provides}
 Provides: jre
 Provides: jre-11
-Provides: jre-11-openjdk
-Provides: jre-openjdk
+Provides: jre-11-%{java_provides}
+Provides: jre-%{java_provides}
 
-%undefine _disable_source_fetch
-Source0: %{expand:%%%{_arch}_tarball_url}
+# https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.10_9.tar.gz
+# https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9_openj9-0.24.0/OpenJDK11U-jdk_s390x_linux_openj9_11.0.10_9_openj9-0.24.0.tar.gz
+Source0: %{source_url_base}/jdk-%{upstream_version_url}%{openj9_url_version}/OpenJDK11u-jdk_%{vers_arch}_linux_%{jvm_type}_%{upstream_version_no_plus}%{openj9_url_version}.tar.gz
+Source1: %{source_url_base}/jdk-%{upstream_version_url}%{openj9_url_version}/OpenJDK11u-jdk_%{vers_arch}_linux_%{jvm_type}_%{upstream_version_no_plus}%{openj9_url_version}.tar.gz.sha256.txt
 
 # Set the compression format to xz to be compatible with more Red Hat flavours. Newer versions of Fedora use zstd which
 # is not available on CentOS 7, for example. https://github.com/rpm-software-management/rpm/blob/master/macros.in#L353
@@ -68,12 +115,7 @@ Eclipse Temurin JDK is an OpenJDK-based development environment to create
 applications and components using the programming language Java.
 
 %prep
-# Check integrity of downloaded tarball
-%define tarball %{basename:%{SOURCE0}}
-pushd %{_sourcedir}
-echo '%{expand:%%%{_arch}_checksum} %{tarball}' > %{tarball}.sha256.txt
-sha256sum -c %{tarball}.sha256.txt
-popd
+%setup -n jdk-%{upstream_version}
 
 %build
 # noop
@@ -178,5 +220,5 @@ fi
 /usr/lib/tmpfiles.d/%{name}.conf
 
 %changelog
-* Sun Jan 31 2021 Eclipse Adoptium Package Maintainers <packaging@adoptium.com> 11.0.10.0.0+9-1.adopt0
+* Sun Jan 31 2021 Eclipse Adoptium Package Maintainers <packaging@adoptium.com> 11.0.10.0.0.9-1.adopt0
 - Eclipse Temurin 11.0.10+9 release.
