@@ -1,0 +1,104 @@
+RPM installers (Fedora/Red Hat)
+-------------------------------
+
+This is an example spec file which can be used to produce an SRPM and rebuild
+that SRPM into a binary RPM. It supports building it for the current target
+architecture or for a different one that the host system by specifying 'vers_arch'.
+
+Different JVM types are supported by using the '--with openj9' RPM conditional
+switch.
+
+Prequisites:
+
+'rpm-build' and 'rpmdevtools' packages are installed.
+
+
+Produce a source/binary RPM for Hotspot x86_64:
+-----------------------------------------------
+
+Consider this Hotspot RPM build where x86_64 is the build hosts'
+architecture.
+
+$ spec=$(pwd)/temurin-jdk-11.spec
+$ mkdir hotspot_x86_64
+$ pushd hotspot_x86_64
+$ spectool --gf ${spec}
+
+Currently fails due to typo (uppercase 'U') in sha256.txt files
+
+$ sha256sum -c *.sha256.txt
+
+Create an SRPM
+
+$ rpmbuild --define "_sourcedir $(pwd)" --define "_specdir $(pwd)" \
+           --define "_builddir $(pwd)" --define "_srcrpmdir $(pwd)" \
+           --define "_rpmdir $(pwd)" --nodeps -bs ${spec}
+
+Build the binary from the SRPM
+
+$ rpmbuild --define "_sourcedir $(pwd)" --define "_specdir $(pwd)" \
+           --define "_builddir $(pwd)" --define "_srcrpmdir $(pwd)" \
+           --define "_rpmdir $(pwd)" --rebuild *.src.rpm
+
+
+OpenJ9 s390x (on x86_64 host):
+------------------------------
+
+In order to produce RPMs on an x86_64 build host for the s390x
+target architecture and the OpenJ9 JVM, consider this example.
+
+$ spec=$(pwd)/temurin-jdk-11.spec
+$ mkdir openj9_s390x
+$ pushd openj9_s390x
+$ spectool --define '_with_openj9 --with-openj9' \
+           --define 'vers_arch s390x' \
+           --gf ${spec}.spec
+
+Currently fails due to typo (uppercase 'U') in sha256.txt files
+
+$ sha256sum -c *.sha256.txt
+
+Create an SRPM
+
+$ rpmbuild --with openj9 --define 'vers_arch s390x' \
+           --define "_sourcedir $(pwd)" --define "_specdir $(pwd)" \
+           --define "_builddir $(pwd)" --define "_srcrpmdir $(pwd)" \
+           --define "_rpmdir $(pwd)" --nodeps -bs ${spec}.spec
+
+Build the binary from the SRPM
+
+$ rpmbuild --with openj9 --define 'vers_arch s390x' \
+           --define "_sourcedir $(pwd)" --define "_specdir $(pwd)" \
+           --define "_builddir $(pwd)" --define "_srcrpmdir $(pwd)" \
+           --define "_rpmdir $(pwd)" --target "s390x" --rebuild *.src.rpm
+
+
+OpenJ9 on host architecture:
+----------------------------
+
+In order to produce an RPM with the OpenJ9 JVM on the host architecture, x86_64,
+consider this example:
+
+$ spec=$(pwd)/temurin-jdk-11.spec
+$ mkdir openj9_x86_64
+$ pushd openj9_x86_64
+$ spectool --define '_with_openj9 --with-openj9' \
+           --gf ${spec}.spec
+
+Currently fails due to typo (uppercase 'U') in sha256.txt files
+
+$ sha256sum -c *.sha256.txt
+
+Create an SRPM
+
+$ rpmbuild --with openj9 \
+           --define "_sourcedir $(pwd)" --define "_specdir $(pwd)" \
+           --define "_builddir $(pwd)" --define "_srcrpmdir $(pwd)" \
+           --define "_rpmdir $(pwd)" --nodeps -bs ${spec}.spec
+
+Build the binary from the SRPM
+
+$ rpmbuild --with openj9 \
+           --define "_sourcedir $(pwd)" --define "_specdir $(pwd)" \
+           --define "_builddir $(pwd)" --define "_srcrpmdir $(pwd)" \
+           --define "_rpmdir $(pwd)" --rebuild *.src.rpm
