@@ -1,10 +1,10 @@
-Source: temurin-jdk-11
+Source: temurin-11-jdk
 Section: java
 Priority: optional
 Maintainer: Eclipse Adoptium Package Maintainers <packaging@adoptium.com>
 Build-Depends: debhelper (>= 11), lsb-release
 
-Package: temurin-jdk-11
+Package: temurin-11-jdk
 Architecture: amd64 armhf arm64 ppc64el s390x
 Depends: adoptium-ca-certificates,
          java-common,

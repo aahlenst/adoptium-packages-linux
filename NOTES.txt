@@ -4,17 +4,17 @@ x64
 Job Temurin JDK 11/Debian:
 
 export _JAVA_OPTIONS="-Xmx4g"
-./gradlew clean packageJdkDebian checkJdkDebian --parallel -Ppackage=temurin-jdk-11
+./gradlew clean packageJdkDebian checkJdkDebian --parallel -Ppackage=temurin-11-jdk
 
 Job Temurin JDK 11/RedHat:
 
 export _JAVA_OPTIONS="-Xmx4g"
-./gradlew clean packageJdkRedHat checkJdkRedHat --parallel -Ppackage=temurin-jdk-11
+./gradlew clean packageJdkRedHat checkJdkRedHat --parallel -Ppackage=temurin-11-jdk
 
 Job Temurin JDK 11/SUSE:
 
 export _JAVA_OPTIONS="-Xmx4g"
-./gradlew clean packageJdkSuse checkJdkSuse --parallel -Ppackage=temurin-jdk-11
+./gradlew clean packageJdkSuse checkJdkSuse --parallel -Ppackage=temurin-11-jdk
 
 Job Temurin JDK 16/Debian:
 
@@ -39,21 +39,21 @@ Job Temurin JDK 11/Debian:
 export _JAVA_OPTIONS="-Xmx4g"
 export TESTCONTAINERS_RYUK_DISABLED=true
 export TESTCONTAINERS_CHECKS_DISABLE=true
-./gradlew clean packageJdkDebian checkJdkDebian --parallel -Ppackage=temurin-jdk-11
+./gradlew clean packageJdkDebian checkJdkDebian --parallel -Ppackage=temurin-11-jdk
 
 Job Temurin JDK 11/RedHat:
 
 export _JAVA_OPTIONS="-Xmx4g"
 export TESTCONTAINERS_RYUK_DISABLED=true
 export TESTCONTAINERS_CHECKS_DISABLE=true
-./gradlew clean packageJdkRedHat checkJdkRedHat --parallel -Ppackage=temurin-jdk-11
+./gradlew clean packageJdkRedHat checkJdkRedHat --parallel -Ppackage=temurin-11-jdk
 
 Job Temurin JDK 11/SUSE:
 
 export _JAVA_OPTIONS="-Xmx4g"
 export TESTCONTAINERS_RYUK_DISABLED=true
 export TESTCONTAINERS_CHECKS_DISABLE=true
-./gradlew clean packageJdkSuse checkJdkSuse --parallel -Ppackage=temurin-jdk-11
+./gradlew clean packageJdkSuse checkJdkSuse --parallel -Ppackage=temurin-11-jdk
 
 Job Temurin JDK 16/Debian:
 
@@ -79,7 +79,7 @@ export TESTCONTAINERS_CHECKS_DISABLE=true
 
 Notes:
 
-* `-Ppackage=temurin-jdk-16` or `-Ppackage=temurin-jdk-11` does not work at the moment.
-* For regular testing `./gradlew clean package checkPackage -Ppackage=temurin-jdk-11` and `./gradlew clean package checkPackage -Ppackage=temurin-jdk-16` do all we need. Each command can replace 3 of the jobs listed above.
+* `-Ppackage=temurin-jdk-16` or `-Ppackage=temurin-11-jdk` does not work at the moment.
+* For regular testing `./gradlew clean package checkPackage -Ppackage=temurin-11-jdk` and `./gradlew clean package checkPackage -Ppackage=temurin-jdk-16` do all we need. Each command can replace 3 of the jobs listed above.
 * Collect */*/build/ospackage/* (that's we have to upload somewhere later), and ideally */*/build/reports/** (test reports to investigate if something goes wrong).
 * Expect dozens of additional jobs (additional platforms like arm32, s390x), JREs (not all versions), additional JDKs like Dragonwell (not all versions or platforms), more products (JMC, jtreg, ...).

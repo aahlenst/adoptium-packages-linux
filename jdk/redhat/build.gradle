@@ -90,7 +90,7 @@ task checkJdkRedHat(type: Test) {
 	testClassesDirs = sourceSets.packageTest.output.classesDirs
 	classpath = sourceSets.packageTest.runtimeClasspath
 
-	environment "PACKAGE", "temurin-jdk-11"
+	environment "PACKAGE", "temurin-11-jdk"
 
 	useJUnitPlatform()
 	testLogging {

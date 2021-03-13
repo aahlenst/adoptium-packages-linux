@@ -1,15 +1,44 @@
-%define version 11.0.10.0.0+9
-%define release 1.adopt0
-%define priority 1111
+# Avoid build failures on some distros due to missing build-id in binaries.
+%global debug_package %{nil}
+%global __brp_strip %{nil}
 
-%define x86_64_tarball_url https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.10_9.tar.gz
-%define x86_64_checksum ae78aa45f84642545c01e8ef786dfd700d2226f8b12881c844d6a1f71789cb99
-%define aarch64_tarball_url https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_aarch64_linux_hotspot_11.0.10_9.tar.gz
-%define aarch64_checksum 420c5d1e5dc66b2ed7dedd30a7bdf94bfaed10d5e1b07dc579722bf60a8114a9
+%global upstream_version 11.0.10+9
+# Only [A-Za-z0-9.] allowed in version:
+# https://docs.fedoraproject.org/en-US/packaging-guidelines/Versioning/#_upstream_uses_invalid_characters_in_the_version
+# also not very intuitive:
+#  $ rpmdev-vercmp 11.0.10.0.1___9 11.0.10.0.0+9
+#  11.0.10.0.0___9 == 11.0.10.0.0+9
+%global spec_version 11.0.10.0.0.9
+%global upstream_version_url %(echo %{upstream_version} | sed 's/\+/%%2B/g')
+%global upstream_version_no_plus %(echo %{upstream_version} | sed 's/\+/_/g')
 
-Name:        temurin-jdk-11
-Version:     %{version}
-Release:     %{release}
+%global spec_release 1
+%global priority 1111
+
+# Map architecture to the expected value in the download URL; Allow for a
+# pre-defined value of vers_arch and use that if it's defined
+#  x86_64 => x64
+#  i668 = x86
+%if %{!?vers_arch:1}0
+%ifarch x86_64
+%global vers_arch x64
+%else
+%ifarch %{ix86}
+%global vers_arch x86
+%else
+# Catch-all, use _arch value
+%global vers_arch %{_arch}
+%endif
+%endif
+%endif
+
+%global java_provides openjdk
+
+%global source_url_base https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download
+
+Name:        temurin-11-jdk
+Version:     %{spec_version}
+Release:     %{spec_release}
 Summary:     Eclipse Temurin 11 JDK
 
 Group:       java
@@ -19,7 +48,7 @@ URL:         https://projects.eclipse.org/projects/adoptium
 Packager:    Eclipse Adoptium Package Maintainers <packaging@adoptium.com>
 
 AutoReqProv: no
-Prefix: %{_libdir}/jvm/%{name}
+Prefix: /usr/lib/jvm/%{name}
 
 BuildRequires:  tar
 BuildRequires:  wget
@@ -27,47 +56,49 @@ BuildRequires:  wget
 Requires: /bin/sh
 Requires: /usr/sbin/alternatives
 Requires: ca-certificates
-Requires: dejavu-fonts
-Requires: libX11-6%{?_isa}
-Requires: libXext6%{?_isa}
-Requires: libXi6%{?_isa}
-Requires: libXrender1%{?_isa}
-Requires: libXtst6%{?_isa}
-Requires: libasound2%{?_isa}
+Requires: dejavu-sans-fonts
+Requires: libX11%{?_isa}
+Requires: libXext%{?_isa}
+Requires: libXi%{?_isa}
+Requires: libXrender%{?_isa}
+Requires: libXtst%{?_isa}
+Requires: alsa-lib%{?_isa}
 Requires: glibc%{?_isa}
-Requires: libz1%{?_isa}
+Requires: zlib%{?_isa}
 Requires: fontconfig%{?_isa}
-Requires: libfreetype6%{?_isa}
+Requires: freetype%{?_isa}
 
 Provides: java
 Provides: java-11
 Provides: java-11-devel
-Provides: java-11-openjdk
-Provides: java-11-openjdk-devel
+Provides: java-11-%{java_provides}
+Provides: java-11-%{java_provides}-devel
 Provides: java-devel
-Provides: java-openjdk
-Provides: java-openjdk-devel
+Provides: java-%{java_provides}
+Provides: java-%{java_provides}-devel
 Provides: java-sdk-11
-Provides: java-sdk-11-openjdk
+Provides: java-sdk-11-%{java_provides}
 Provides: jre
 Provides: jre-11
-Provides: jre-11-openjdk
-Provides: jre-openjdk
+Provides: jre-11-%{java_provides}
+Provides: jre-%{java_provides}
 
 %undefine _disable_source_fetch
-Source0: %{expand:%%%{_arch}_tarball_url}
+Source0: %{source_url_base}/jdk-%{upstream_version_url}/OpenJDK11U-jdk_%{vers_arch}_linux_hotspot_%{upstream_version_no_plus}.tar.gz
+Source1: %{source_url_base}/jdk-%{upstream_version_url}/OpenJDK11U-jdk_%{vers_arch}_linux_hotspot_%{upstream_version_no_plus}.tar.gz.sha256.txt
+
+# Set the compression format to xz to be compatible with more Red Hat flavours. Newer versions of Fedora use zstd which
+# is not available on CentOS 7, for example. https://github.com/rpm-software-management/rpm/blob/master/macros.in#L353
+# lists the available options.
+%define _source_payload w7.xzdio
+%define _binary_payload w7.xzdio
 
 %description
 Eclipse Temurin JDK is an OpenJDK-based development environment to create
 applications and components using the programming language Java.
 
 %prep
-# Check integrity of downloaded tarball
-%define tarball %{basename:%{SOURCE0}}
-pushd %{_sourcedir}
-echo '%{expand:%%%{_arch}_checksum} %{tarball}' > %{tarball}.sha256.txt
-sha256sum -c %{tarball}.sha256.txt
-popd
+%setup -n jdk-%{upstream_version}
 
 %build
 # noop
@@ -83,15 +114,21 @@ rm -f "%{buildroot}%{prefix}/lib/libfreetype.so"
 # Use cacerts included in OS
 rm -f "%{buildroot}%{prefix}/lib/security/cacerts"
 pushd "%{buildroot}%{prefix}/lib/security"
-ln -s /var/lib/ca-certificates/java-cacerts "%{buildroot}%{prefix}/lib/security/cacerts"
+ln -s /etc/pki/java/cacerts "%{buildroot}%{prefix}/lib/security/cacerts"
 popd
+
+# Ensure systemd-tmpfiles-clean does not remove pid files
+# https://bugzilla.redhat.com/show_bug.cgi?id=1704608
+%{__mkdir} -p %{buildroot}/usr/lib/tmpfiles.d
+echo 'x /tmp/hsperfdata_*' > "%{buildroot}/usr/lib/tmpfiles.d/%{name}.conf"
+echo 'x /tmp/.java_pid*' >> "%{buildroot}/usr/lib/tmpfiles.d/%{name}.conf"
 
 %pretrans
 # noop
 
 %post
 if [ $1 -ge 1 ] ; then
-    update-alternatives --install %{_bindir}/java java %{prefix}/bin/java 1111 \
+    update-alternatives --install %{_bindir}/java java %{prefix}/bin/java %{priority} \
                         --slave %{_bindir}/jfr jfr %{prefix}/bin/jfr \
                         --slave %{_bindir}/jjs jjs %{prefix}/bin/jjs \
                         --slave %{_bindir}/jrunscript jrunscript %{prefix}/bin/jrunscript \
@@ -111,7 +148,7 @@ if [ $1 -ge 1 ] ; then
                         --slave  %{_mandir}/man1/rmiregistry.1 rmiregistry.1 %{prefix}/man/man1/rmiregistry.1 \
                         --slave  %{_mandir}/man1/unpack200.1 unpack200.1 %{prefix}/man/man1/unpack200.1
 
-    update-alternatives --install %{_bindir}/javac javac %{prefix}/bin/javac 1111 \
+    update-alternatives --install %{_bindir}/javac javac %{prefix}/bin/javac %{priority} \
                         --slave %{_bindir}/jaotc jaotc %{prefix}/bin/jaotc \
                         --slave %{_bindir}/jar jar %{prefix}/bin/jar \
                         --slave %{_bindir}/jarsigner jarsigner %{prefix}/bin/jarsigner \
@@ -163,7 +200,8 @@ fi
 %files
 %defattr(-,root,root)
 %{prefix}
+/usr/lib/tmpfiles.d/%{name}.conf
 
 %changelog
-* Sun Jan 31 2021 Eclipse Adoptium Package Maintainers <packaging@adoptium.com> 11.0.10.0.0+9-1.adopt0
+* Sun Jan 31 2021 Eclipse Adoptium Package Maintainers <packaging@adoptium.com> 11.0.10.0.0.9-1.adopt0
 - Eclipse Temurin 11.0.10+9 release.
