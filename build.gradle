@@ -31,3 +31,11 @@ tasks.register("checkPackage") {
 }
 
 check.dependsOn(checkPackage)
+
+def getProduct() {
+	return hasProperty("PRODUCT") ? PRODUCT.toString().toLowerCase(Locale.US) : null
+}
+
+def getProductVersion() {
+	return hasProperty("PRODUCT_VERSION") ? Integer.parseInt(PRODUCT_VERSION) : null
+}

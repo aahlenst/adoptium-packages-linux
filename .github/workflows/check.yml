@@ -6,13 +6,18 @@ on:
 
 jobs:
   check:
-    name: "Check on ${{ matrix.os }}"
-    runs-on: ${{ matrix.os }}
+    name: "Check ${{ matrix.product.name }} ${{ matrix.product.version }}"
+    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         # No Docker on macOS
         # https://github.community/t/is-it-possible-to-install-and-configure-docker-on-macos-runner/16981/8
-        os: [ ubuntu-latest ]
+        product: [
+          { name: dragonwell, version: 11 },
+          { name: temurin, version: 11 },
+          { name: temurin, version: 16 },
+        ]
 
     steps:
       - name: Checkout
@@ -27,4 +32,4 @@ jobs:
       - name: Build
         run: |
           export _JAVA_OPTIONS="-Xmx4G"
-          ./gradlew check --stacktrace
+          ./gradlew --parallel check -PPRODUCT=${{ matrix.product.name }} -PPRODUCT_VERSION=${{ matrix.product.version }} --stacktrace

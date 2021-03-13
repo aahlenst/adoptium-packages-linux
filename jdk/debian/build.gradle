@@ -1,9 +1,3 @@
-import org.apache.tools.ant.filters.ReplaceTokens
-
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-
 plugins {
 	id "java"
 }
@@ -20,9 +14,6 @@ repositories {
 
 group "org.adoptium"
 version "1.0.0-SNAPSHOT"
-
-def buildType = "temurin"
-def majorVersion = 11
 
 /*
  * The versions list defines the Debian and Ubuntu versions that this package is uploaded to.
@@ -75,17 +66,19 @@ task packageJdkDebian {
 	def outputDir = new File(project.buildDir.absolutePath, "ospackage")
 	outputs.dir(outputDir)
 
+	def product = getProduct()
+	def productVersion = getProductVersion()
+
+	if (product == null) {
+		throw new IllegalArgumentException("Undefined product")
+	}
+	if (productVersion == null) {
+		throw new IllegalArgumentException("Undefined product version")
+	}
+
 	doLast {
-		def datePattern = DateTimeFormatter.ofPattern("E, dd MMM yyyy HH:mm:ss xx").withLocale(Locale.US)
 		project.copy {
-			from("src/main/packaging/$buildType/$majorVersion/") {
-				filter(ReplaceTokens, tokens: [
-					"buildversion": "15+35-202008102051",
-					"pkgdate"     : OffsetDateTime.now(ZoneOffset.UTC).format(datePattern),
-					"pkgversion"  : "11.0.8+10-0~adopt0",
-					"tarball"     : "OpenJDK11U-jdk_x64_linux_hotspot_11.0.8_10.tar.gz"
-				])
-			}
+			from("src/main/packaging/$product/$productVersion/")
 			into("${buildDir}/generated/packaging")
 		}
 		project.exec {
@@ -116,7 +109,17 @@ task checkJdkDebian(type: Test) {
 	testClassesDirs = sourceSets.packageTest.output.classesDirs
 	classpath = sourceSets.packageTest.runtimeClasspath
 
-	environment "PACKAGE", "temurin-11-jdk"
+	def product = getProduct()
+	def productVersion = getProductVersion()
+
+	if (product == null) {
+		throw new IllegalArgumentException("Undefined product")
+	}
+	if (productVersion == null) {
+		throw new IllegalArgumentException("Undefined product version")
+	}
+
+	environment "PACKAGE", "${product}-${productVersion}-jdk"
 
 	useJUnitPlatform()
 	testLogging {

@@ -15,9 +15,6 @@ repositories {
 group "org.adoptium"
 version "1.0.0-SNAPSHOT"
 
-def buildType = "temurin"
-def majorVersion = 11
-
 java {
 	sourceCompatibility = JavaVersion.VERSION_1_8
 	targetCompatibility = JavaVersion.VERSION_1_8
@@ -58,9 +55,19 @@ task packageJdkSuse {
 	def outputDir = new File(project.buildDir.absolutePath, "ospackage")
 	outputs.dir(outputDir)
 
+	def product = getProduct()
+	def productVersion = getProductVersion()
+
+	if (product == null) {
+		throw new IllegalArgumentException("Undefined product")
+	}
+	if (productVersion == null) {
+		throw new IllegalArgumentException("Undefined product version")
+	}
+
 	doLast {
 		project.copy {
-			from("src/main/packaging/$buildType/$majorVersion/")
+			from("src/main/packaging/$product/$productVersion/")
 			into("${buildDir}/generated/packaging")
 		}
 		project.exec {
@@ -90,7 +97,17 @@ task checkJdkSuse(type: Test) {
 	testClassesDirs = sourceSets.packageTest.output.classesDirs
 	classpath = sourceSets.packageTest.runtimeClasspath
 
-	environment "PACKAGE", "temurin-11-jdk"
+	def product = getProduct()
+	def productVersion = getProductVersion()
+
+	if (product == null) {
+		throw new IllegalArgumentException("Undefined product")
+	}
+	if (productVersion == null) {
+		throw new IllegalArgumentException("Undefined product version")
+	}
+
+	environment "PACKAGE", "$product-$productVersion-jdk"
 
 	useJUnitPlatform()
 	testLogging {

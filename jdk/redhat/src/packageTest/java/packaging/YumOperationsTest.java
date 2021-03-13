@@ -63,8 +63,7 @@ class YumOperationsTest {
 				.contains("Group       : java")
 				.contains("License     : GPLv2 with exceptions")
 				.contains("Relocations : /usr/lib/jvm/" + System.getenv("PACKAGE"))
-				.contains("Packager    : Eclipse Adoptium Package Maintainers <packaging@adoptium.com>")
-				.contains("Vendor      : Eclipse Adoptium");
+				.contains("Packager    : Eclipse Adoptium Package Maintainers <packaging@adoptium.com>");
 		}
 	}
 }

@@ -1,12 +1,12 @@
 #!/usr/bin/make -f
 
-pkg_name = temurin-16-jdk
-priority = 1161
-jvm_tools = jaotc jar jarsigner java javac javadoc javap jcmd jconsole jdb jdeprscan jdeps jfr jhsdb jimage jinfo jlink jmap jmod jpackage jps jrunscript jshell jstack jstat jstatd keytool rmid rmiregistry serialver jexec jspawnhelper
-amd64_tarball_url = https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk16-2021-01-28-06-06/OpenJDK16-jdk_x64_linux_hotspot_2021-01-28-06-06.tar.gz
-amd64_checksum = 058e5f48321f58895b1cc5c70bc0e929ce51f6d6609f01d7c4e755dc9f9656b3
-arm64_tarball_url = https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk16-2021-01-28-06-06/OpenJDK16-jdk_aarch64_linux_hotspot_2021-01-28-06-06.tar.gz
-arm64_checksum = 9dac272d16918e2d9f58cf9762c6eee61f31f17608aab9df781e9bb3b2c85c56
+pkg_name = dragonwell-11-jdk
+priority = 1111
+jvm_tools = jaotc jar jarsigner java javac javadoc javap jcmd jconsole jdb jdeprscan jdeps jfr jhsdb jimage jinfo jjs jlink jmap jmod jps jrunscript jshell jstack jstat jstatd keytool pack200 rmic rmid rmiregistry serialver unpack200 jexec jspawnhelper
+amd64_tarball_url = https://github.com/alibaba/dragonwell11/releases/download/dragonwell-11.0.10.5_jdk-11.0.10-ga/Alibaba_Dragonwell_11.0.10.5_linux_x64.tar.gz
+amd64_checksum = 4f06b7ef58ad0d43dc9a19624e493558e99c56c9dd41eced0d195c4f2f9be7f4
+arm64_tarball_url = https://github.com/alibaba/dragonwell11/releases/download/dragonwell-11.0.10.5_jdk-11.0.10-ga/Alibaba_Dragonwell_11.0.10.5_linux_aarch64.tar.gz
+arm64_checksum = dbc74e692da5a5f84aa3142e014de36a5002bed87e067b9286cb3d44d7ce10d4
 
 d = debian/$(pkg_name)
 jvm_home = usr/lib/jvm
