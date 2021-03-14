@@ -31,6 +31,7 @@ rpmdev-setuptree \n\
 \n\
 # Build all spec files we can find.\n\
 for spec in "$(ls /home/builder/build/generated/packaging/*.spec)"; do\n\
+	spectool -g -R "$spec";\n\
 	rpmbuild -bb "$spec";\n\
 done;\n\
 \n\

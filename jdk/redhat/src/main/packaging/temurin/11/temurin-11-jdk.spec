@@ -1,7 +1,3 @@
-# Avoid build failures on some distros due to missing build-id in binaries.
-%global debug_package %{nil}
-%global __brp_strip %{nil}
-
 %global upstream_version 11.0.10+9
 # Only [A-Za-z0-9.] allowed in version:
 # https://docs.fedoraproject.org/en-US/packaging-guidelines/Versioning/#_upstream_uses_invalid_characters_in_the_version
@@ -9,11 +5,13 @@
 #  $ rpmdev-vercmp 11.0.10.0.1___9 11.0.10.0.0+9
 #  11.0.10.0.0___9 == 11.0.10.0.0+9
 %global spec_version 11.0.10.0.0.9
-%global upstream_version_url %(echo %{upstream_version} | sed 's/\+/%%2B/g')
-%global upstream_version_no_plus %(echo %{upstream_version} | sed 's/\+/_/g')
-
 %global spec_release 1
 %global priority 1111
+
+%global source_url_base https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download
+%global upstream_version_url %(echo %{upstream_version} | sed 's/\+/%%2B/g')
+%global upstream_version_no_plus %(echo %{upstream_version} | sed 's/\+/_/g')
+%global java_provides openjdk
 
 # Map architecture to the expected value in the download URL; Allow for a
 # pre-defined value of vers_arch and use that if it's defined
@@ -31,10 +29,6 @@
 %endif
 %endif
 %endif
-
-%global java_provides openjdk
-
-%global source_url_base https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download
 
 Name:        temurin-11-jdk
 Version:     %{spec_version}
@@ -83,7 +77,6 @@ Provides: jre-11
 Provides: jre-11-%{java_provides}
 Provides: jre-%{java_provides}
 
-%undefine _disable_source_fetch
 Source0: %{source_url_base}/jdk-%{upstream_version_url}/OpenJDK11U-jdk_%{vers_arch}_linux_hotspot_%{upstream_version_no_plus}.tar.gz
 Source1: %{source_url_base}/jdk-%{upstream_version_url}/OpenJDK11U-jdk_%{vers_arch}_linux_hotspot_%{upstream_version_no_plus}.tar.gz.sha256.txt
 
@@ -93,11 +86,19 @@ Source1: %{source_url_base}/jdk-%{upstream_version_url}/OpenJDK11U-jdk_%{vers_ar
 %define _source_payload w7.xzdio
 %define _binary_payload w7.xzdio
 
+# Avoid build failures on some distros due to missing build-id in binaries.
+%global debug_package %{nil}
+%global __brp_strip %{nil}
+
 %description
 Eclipse Temurin JDK is an OpenJDK-based development environment to create
 applications and components using the programming language Java.
 
 %prep
+pushd "%{_sourcedir}"
+sha256sum -c "%SOURCE1"
+popd
+
 %setup -n jdk-%{upstream_version}
 
 %build

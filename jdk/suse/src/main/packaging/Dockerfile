@@ -24,7 +24,7 @@ rpmdev-setuptree \n\
 \n\
 # Build all spec files we can find.\n\
 for spec in "$(ls /home/builder/build/generated/packaging/*.spec)"; do\n\
-	rpmbuild -bb "$spec";\n\
+	rpmbuild --undefine=_disable_source_fetch -bb "$spec";\n\
 done;\n\
 \n\
 # Copy generated RPMs to destination folder\n\
