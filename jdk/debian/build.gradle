@@ -69,14 +69,11 @@ task packageJdkDebian {
 	def product = getProduct()
 	def productVersion = getProductVersion()
 
-	if (product == null) {
-		throw new IllegalArgumentException("Undefined product")
-	}
-	if (productVersion == null) {
-		throw new IllegalArgumentException("Undefined product version")
-	}
-
 	doLast {
+		if (!file("src/main/packaging/$product/$productVersion").exists()) {
+			throw new IllegalArgumentException("Unknown product $product/$productVersion")
+		}
+
 		project.copy {
 			from("src/main/packaging/$product/$productVersion/")
 			into("${buildDir}/generated/packaging")
@@ -112,18 +109,17 @@ task checkJdkDebian(type: Test) {
 	def product = getProduct()
 	def productVersion = getProductVersion()
 
-	if (product == null) {
-		throw new IllegalArgumentException("Undefined product")
-	}
-	if (productVersion == null) {
-		throw new IllegalArgumentException("Undefined product version")
-	}
-
 	environment "PACKAGE", "${product}-${productVersion}-jdk"
 
 	useJUnitPlatform()
 	testLogging {
 		events "passed", "skipped", "failed"
+	}
+
+	doFirst {
+		if (!file("src/main/packaging/$product/$productVersion").exists()) {
+			throw new IllegalArgumentException("Unknown product $product/$productVersion")
+		}
 	}
 }
 
