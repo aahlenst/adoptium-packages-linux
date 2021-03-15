@@ -5,6 +5,25 @@ on:
     branches: [ master ]
 
 jobs:
+  check-ca-certificates:
+    name: "Check ca-certificates"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '8'
+          java-package: jdk
+          architecture: x64
+
+      - name: Build
+        run: |
+          export _JAVA_OPTIONS="-Xmx4G"
+          ./gradlew --parallel :ca-certificates:check --stacktrace
+
   check:
     name: "Check ${{ matrix.product.name }} ${{ matrix.product.version }}"
     runs-on: ubuntu-latest
